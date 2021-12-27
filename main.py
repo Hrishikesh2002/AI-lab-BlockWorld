@@ -38,4 +38,10 @@ def ParseInput(fileName):
                         y += 1
                     x += 1
                     
-                    
+    BlockWorld.append([])
+
+if __name__ == '__main__':
+    ParseInput('input.txt')
+    for Stack in BlockWorld:
+        for block in Stack:
+            print(block.name, block.goalStack, block.goalLevel)
