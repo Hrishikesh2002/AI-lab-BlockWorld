@@ -12,6 +12,8 @@ def ParseInput(fileName):
     input = open(fileName)
     
     status = 'input'
+    
+    x = 0
     for line in input:
         if (status == 'input'):
             if (len(line) != 1):
@@ -26,17 +28,17 @@ def ParseInput(fileName):
                 status = 'output'
             
         elif (status == 'output'):
+            print("output")
             line = line.strip('\n')
+            y = 0
             for char in line:
-                x = 0
                 for Stack in BlockWorld:
-                    y = 0
                     for block in Stack:
                         if(block.name == char):
                             block.goalStack = x
                             block.goalLevel = y
-                        y += 1
-                    x += 1
+                y += 1
+            x += 1
                     
     BlockWorld.append([])
 
