@@ -28,7 +28,6 @@ def ParseInput(fileName):
                 status = 'output'
             
         elif (status == 'output'):
-            print("output")
             line = line.strip('\n')
             y = 0
             for char in line:
