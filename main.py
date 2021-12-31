@@ -1,9 +1,12 @@
 import heapq
 import copy
+import sys
+
 BlockDict = {}
 explored = []
 frontier = []
 goalObject = None
+goalRelPos = None
 
 class Block:
     def __init__(self, name):
@@ -42,6 +45,36 @@ def Euclidean(state):
 
     return heuristic
 
+def RelPos(state):
+    global goalRelPos
+
+    if (goalRelPos == None):
+        heuristic = 0
+        
+        for block in BlockDict.values():
+            heuristic += block.goalLevel + 1
+
+        goalRelPos = heuristic
+
+    heuristic = 0
+    level = 1
+    prevChar = None
+
+    for Stack in state:
+        level = 1
+        for char in Stack:
+
+            if (prevChar == BlockDict[char].down):
+                heuristic += level 
+            else:
+                heuristic -= level 
+            
+            level += 1
+            prevChar = char
+        prevChar = None
+
+    return (goalRelPos - heuristic)
+
 def ParseInput(fileName):
     blockWorld = BlockWorld([])
     input = open(fileName)
@@ -69,6 +102,7 @@ def ParseInput(fileName):
                 block = Block(char)
                 block.goalStack = x
                 block.goalLevel = y
+                block.down = prevChar
                 
                 BlockDict[char] = block
                 prevChar = char
@@ -76,9 +110,12 @@ def ParseInput(fileName):
             x += 1
         prevChar = None
 
+    while len(blockWorld.state) < 3:
+        blockWorld.state.append([])
+
     return blockWorld
 
-def Explore(blockWorld, heuristic):
+def BFSExplore(blockWorld, heuristic):
     global goalObject
 
     if (heuristic(blockWorld.state) == 0):
@@ -101,7 +138,32 @@ def Explore(blockWorld, heuristic):
     explored.append(blockWorld)
     return False
 
-def Begin(blockWorld, Heuristic):
+def HCExplore(blockWorld, heuristic):
+    global goalObject
+
+    frontier = []
+
+    if (heuristic(blockWorld.state) == 0):
+        goalObject = blockWorld
+        return True
+
+    for Stack in blockWorld.state:
+        if(len(Stack)):
+            for newStack in blockWorld.state:
+                if newStack != Stack:
+                    newBlockWorld = BlockWorld(copy.deepcopy(blockWorld.state), None, blockWorld)
+                    block = newBlockWorld.state[blockWorld.state.index(Stack)].pop()
+                    newBlockWorld.state[blockWorld.state.index(newStack)].append(block)
+                    newBlockWorld.move = (block, blockWorld.state.index(Stack), blockWorld.state.index(newStack))
+
+                    if (newBlockWorld.state not in [x.state for x in explored]):
+                        heapq.heappush(frontier, (heuristic(newBlockWorld.state), newBlockWorld))
+
+    
+    explored.append(blockWorld)
+    return False
+
+def Begin(blockWorld, Heuristic, Explore):
     goalFound = False
     heapq.heappush(frontier, (Heuristic(blockWorld.state), blockWorld))
     
@@ -144,6 +206,13 @@ def printOutput():
     print(f"Length of Path: {len(path)}")
 
 if __name__ == '__main__':
-    blockWorld = ParseInput('input.txt')
-    Begin(blockWorld, Manhattan)
+    explore_types = [BFSExplore, HCExplore]
+    heuristic_types = [Manhattan, Euclidean, RelPos]
+
+    if (len(sys.argv) != 4):
+        print("Usage: python main.py <input file> <explore type> <heuristic type>")
+        sys.exit(1)
+    
+    blockWorld = ParseInput(sys.argv[1])
+    Begin(blockWorld, heuristic_types[int(sys.argv[3])], explore_types[int(sys.argv[2])])
     printOutput()
