@@ -1,5 +1,6 @@
-CBA
-ED
+EBF
+DA
+C
 
-CBDA
-E
+ADB
+EFC
