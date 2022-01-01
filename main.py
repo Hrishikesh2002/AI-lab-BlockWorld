@@ -1,6 +1,7 @@
 import heapq
 import copy
 import sys
+import time
 
 BlockDict = {}
 explored = []
@@ -139,7 +140,7 @@ def BFSExplore(blockWorld, heuristic):
     return False
 
 def HCExplore(blockWorld, heuristic):
-    global goalObject
+    global goalObject, frontier
 
     frontier = []
 
@@ -181,9 +182,9 @@ def printOutput():
 
     if (goalObject == None):
         print("No Solution!")
-        return
-
-    print("Solution:")
+    else:
+        print("Solution:")
+    
     current = goalObject
     path = []
     while(current != None):
@@ -197,15 +198,16 @@ def printOutput():
             print(f"Move block {x.move[0]} from Stack {x.move[1]} to Stack {x.move[2]} ")
         else:
             isNotFirst = True
-        for stack in x.state:
-            for block in stack:
-                print(block, end='')
-            print()
+        # for stack in x.state:
+        #     for block in stack:
+        #         print(block, end='')
+        #     print()
 
     print(f"States Explored: {len(explored)}")
     print(f"Length of Path: {len(path)}")
 
 if __name__ == '__main__':
+    start_time = time.time()
     explore_types = [BFSExplore, HCExplore]
     heuristic_types = [Manhattan, Euclidean, RelPos]
 
@@ -216,3 +218,4 @@ if __name__ == '__main__':
     blockWorld = ParseInput(sys.argv[1])
     Begin(blockWorld, heuristic_types[int(sys.argv[3])], explore_types[int(sys.argv[2])])
     printOutput()
+    print(f"Time Elapsed: {round(time.time() - start_time,5)} seconds")
